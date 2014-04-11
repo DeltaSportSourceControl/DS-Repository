@@ -31,8 +31,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -96,6 +94,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 				tvNoLicenceNotification = (TextView) findViewById(R.id.tvLicenceNotification);
 				tvNoLicenceNotification.setText(notification);
+				System.out.println("test");
 
 			} else {
 				if(isUserRegistered.equals("True"))

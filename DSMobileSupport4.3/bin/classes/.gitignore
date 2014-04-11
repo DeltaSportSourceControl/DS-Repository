@@ -1,5 +1,4 @@
-/activities
 /com
-/domain
+/.gitignore
+/activities
 /util
-/webservice
