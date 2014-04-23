@@ -1,5 +1,7 @@
 package activities;
 
+import java.io.File;
+
 import util.Enums;
 import util.MessageManager;
 import webservice.WSOGetLatestVersion;
@@ -8,6 +10,8 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Environment;
 import android.os.Handler;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +25,9 @@ public class DownloadNewVersion extends Activity implements OnClickListener {
 	private String webResponse;
 	private Handler handler = new Handler();
 	private String downloadUrl;
+	private File downloadFile = new File(Environment
+			.getExternalStorageDirectory().getAbsolutePath() + "/download/");
+	private String application;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +83,19 @@ public class DownloadNewVersion extends Activity implements OnClickListener {
 		switch (v.getId()) {
 		case R.id.btnDownload2_2:
 			downloadUrl = "http://mobileappsupport.deltasport.com/Download/Android2.2/DSMobileSupport2.2.apk";
+			application = "DSMobileSupport2.2.apk";
 			download(Enums.AndroidVersion.android22.ordinal());
 			break;
 		case R.id.btnDownload4_3:
 			downloadUrl = "http://mobileappsupport.deltasport.com/Download/Android4.3/DSMobileSupport4.3.apk";
+			application = "DSMobileSupport4.3.apk";
 			download(Enums.AndroidVersion.android43.ordinal());
 			break;
 		}
 	}
 
 	private void download(int androidVersionId) {
+		webResponse = "";
 		if (androidVersionId == Enums.AndroidVersion.android43.ordinal()) {
 			Object[] parameters = new Object[1];
 			parameters[0] = androidVersionId;
@@ -94,7 +104,6 @@ public class DownloadNewVersion extends Activity implements OnClickListener {
 			webResponse = wsoGetLatestVersion.callWebService(parameters);
 		}
 		handler.post(webServiceResult);
-
 	}
 
 	final Runnable webServiceResult = new Runnable() {
@@ -107,9 +116,32 @@ public class DownloadNewVersion extends Activity implements OnClickListener {
 					MessageManager.showShortMessage(getApplicationContext(),
 							"Nema novih verzija");
 				else {
-					Intent intent22 = new Intent(Intent.ACTION_VIEW,
+					deleteOldAppFiles();
+					
+					Intent intent43 = new Intent(Intent.ACTION_VIEW,
 							Uri.parse(downloadUrl));
-					startActivity(intent22);
+					startActivity(intent43);
+					
+					new CountDownTimer(60000, 3000) {
+						boolean finished;
+						public void onTick(long millisUntilFinished) {
+							if (downloadFinished() && !finished){
+								finished = true;
+								onFinish();
+							}															
+						}						
+
+						public void onFinish() {
+							Intent intent = new Intent(Intent.ACTION_VIEW);
+							intent.setDataAndType(Uri.fromFile(new File(
+									Environment.getExternalStorageDirectory()
+											+ "/download/" + application)),
+									"application/vnd.android.package-archive");
+							intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+							startActivity(intent);
+							cancel();
+						}
+					}.start();
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -118,4 +150,19 @@ public class DownloadNewVersion extends Activity implements OnClickListener {
 			}
 		}
 	};
+	
+	private void deleteOldAppFiles() {
+		for (File file : downloadFile.listFiles()) {
+			if (file.getName().startsWith("DSMobileSupport"))
+				file.delete();
+		}
+	}
+	
+	private boolean downloadFinished() {
+		for (File file : downloadFile.listFiles()) {
+			if (file.getName().startsWith(application))
+				return true;
+		}
+		return false;
+	}
 }
