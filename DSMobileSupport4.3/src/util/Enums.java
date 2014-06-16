@@ -9,7 +9,8 @@ public class Enums {
 	    setNotificationText,
 	    storeUserRequest,
 	    getRetailStores,
-	    checkIsNewVersionAvailable
+	    checkIsNewVersionAvailable,
+	    updateUserSettings
 	}
 	
 	public enum AndroidVersion {

@@ -26,7 +26,7 @@ public class WSOStoreUserRequest extends WebServiceOperation {
 			String retailStoreId = EncryptDecrypt.encrypt(parameters[3]
 					.toString());
 			String deviceId = EncryptDecrypt.encrypt(parameters[4].toString());
-			String andrVersion = EncryptDecrypt.encrypt(parameters[5].toString());
+			String operatingSystemVersion = EncryptDecrypt.encrypt(parameters[5].toString());
 			
 
 			PropertyInfo userId = new PropertyInfo();
@@ -59,11 +59,17 @@ public class WSOStoreUserRequest extends WebServiceOperation {
 			device.setType(String.class);
 			request.addProperty(device);
 
-			PropertyInfo androidVersion = new PropertyInfo();
-			androidVersion.setName("androidVersion");
-			androidVersion.setValue(andrVersion);
-			androidVersion.setType(String.class);
-			request.addProperty(androidVersion);		
+			PropertyInfo osVersion = new PropertyInfo();
+			osVersion.setName("osVersion");
+			osVersion.setValue(operatingSystemVersion);
+			osVersion.setType(String.class);
+			request.addProperty(osVersion);		
+			
+			PropertyInfo mobileOSId = new PropertyInfo();
+			mobileOSId.setName("mobileOSId");
+			mobileOSId.setValue(EncryptDecrypt.encrypt("1"));//uvek je 1 jer oznacava Android aplikaciju u bazu
+			mobileOSId.setType(int.class);
+			request.addProperty(mobileOSId);
 
 		} catch (Exception e) {
 			e.printStackTrace();

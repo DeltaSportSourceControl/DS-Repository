@@ -53,6 +53,7 @@
     <string name="soap_action_storeuserrequest">http://tempuri.org/StoreUserRequest</string>
     <string name="soap_action_getlatestversion">http://tempuri.org/GetLatestVersion</string>
     <string name="soap_action_getimagesurl">http://tempuri.org/GetImageList</string>
+    <string name="soap_action_updateusersettings">http://tempuri.org/UpdateUserSettings</string>
 
     <!-- Method name -->
     <string name="method_name_getitembylocationanditemId">GetItemByLocationAndItemId</string>
@@ -65,6 +66,7 @@
     <string name="method_name_storeuserrequest">StoreUserRequest</string>
     <string name="method_name_getlatestversion">GetLatestVersion</string>
     <string name="method_name_getimagesurl">GetImageList</string>
+    <string name="method_name_updateusersettings">UpdateUserSettings</string>
 
     <!-- Text -->
     <string name="txtNoLicenceNotification">Nemate pravo za korišćenje ove aplikacije.\nPrijavite se IT sektoru Delta Sporta i dostavite sledeće podatke:</string>

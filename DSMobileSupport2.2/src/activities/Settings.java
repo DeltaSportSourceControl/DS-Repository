@@ -15,9 +15,12 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import util.Enums;
 import util.MessageManager;
 import util.ReadWrite;
+import util.TelephoneManager;
 import webservice.WSOGetRetailStores;
+import webservice.WSOUpdateUserSettings;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +47,7 @@ public class Settings extends Activity {
 	private TextView tVCcurrentRetailStore;
 	private Handler handler = new Handler();
 	private String webResponse;
+	private int webMethod;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -107,6 +111,7 @@ public class Settings extends Activity {
 	public void getRetailStores() {
 		WSOGetRetailStores wsoGetRetailStores = new WSOGetRetailStores(
 				getApplicationContext());
+		webMethod  = Enums.WebMethod.getRetailStores.ordinal();
 		webResponse = wsoGetRetailStores.callWebService(null);
 		handler.post(webServiceResult);
 	}
@@ -114,52 +119,58 @@ public class Settings extends Activity {
 	final Runnable webServiceResult = new Runnable() {
 		public void run() {
 			try {
-				// Uzima odgovor iz klase koja je pozvala odgovarajucu metodu
-				// web servisa				
-				List<RetailStore> spinnerArray = new ArrayList<RetailStore>();
-				DocumentBuilder builder;
-				builder = DocumentBuilderFactory.newInstance()
-						.newDocumentBuilder();
-				Document document = builder.parse(new InputSource(
-						new StringReader(webResponse)));
-
-				XPathFactory xPathfactory = XPathFactory.newInstance();
-				XPath xpath = xPathfactory.newXPath();
-				XPathExpression expr = null;
-				expr = xpath.compile("/retailStores/retailStore");
-				NodeList retailStores = null;
-				retailStores = (NodeList) expr.evaluate(document,
-						XPathConstants.NODESET);
-
-				for (int i = 0; i < retailStores.getLength(); i++) {
-					RetailStore rs = new RetailStore();
-
-					int retailStoreId = Integer
-							.valueOf(retailStores.item(i).getAttributes()
-									.getNamedItem("retailStoreId")
-									.getNodeValue().toString()
-									.replace('"', ' ').trim());
-					String name = retailStores.item(i).getAttributes()
-							.getNamedItem("name").getNodeValue();
-					int retailGroupId = Integer
-							.valueOf(retailStores.item(i).getAttributes()
-									.getNamedItem("retailGroupId")
-									.getNodeValue().toString()
-									.replace('"', ' ').trim());
-
-					rs.setRetailStoreId(retailStoreId);
-					rs.setName(name);
-					rs.setRetailGroupId(retailGroupId);
-					spinnerArray.add(rs);
+				if(webMethod == Enums.WebMethod.updateUserSettings.ordinal())
+				{
+					if(!webResponse.equals("ok"))
+					{
+						String textError = "Podešavanja neuspešna na serveru!";
+						MessageManager.showShortMessage(getApplicationContext(), textError);
+					}
 				}
+				else
+				if (webMethod == Enums.WebMethod.getRetailStores.ordinal()) {
+					// Uzima odgovor iz klase koja je pozvala odgovarajucu metodu
+					// web servisa				
+					List<RetailStore> spinnerArray = new ArrayList<RetailStore>();
+					DocumentBuilder builder;
+					builder = DocumentBuilderFactory.newInstance()
+							.newDocumentBuilder();
+					Document document = builder.parse(new InputSource(
+							new StringReader(webResponse)));
+					XPathFactory xPathfactory = XPathFactory.newInstance();
+					XPath xpath = xPathfactory.newXPath();
+					XPathExpression expr = null;
+					expr = xpath.compile("/retailStores/retailStore");
+					NodeList retailStores = null;
+					retailStores = (NodeList) expr.evaluate(document,
+							XPathConstants.NODESET);
+					for (int i = 0; i < retailStores.getLength(); i++) {
+						RetailStore rs = new RetailStore();
 
-				ArrayAdapter<RetailStore> adapter = new ArrayAdapter<RetailStore>(
-						getApplicationContext(),
-						android.R.layout.simple_spinner_item, spinnerArray);
-				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-				spRetailStores = (Spinner) findViewById(R.id.spRetailStore);
-				spRetailStores.setAdapter(adapter);
+						int retailStoreId = Integer.valueOf(retailStores
+								.item(i).getAttributes()
+								.getNamedItem("retailStoreId").getNodeValue()
+								.toString().replace('"', ' ').trim());
+						String name = retailStores.item(i).getAttributes()
+								.getNamedItem("name").getNodeValue();
+						int retailGroupId = Integer.valueOf(retailStores
+								.item(i).getAttributes()
+								.getNamedItem("retailGroupId").getNodeValue()
+								.toString().replace('"', ' ').trim());
+
+						rs.setRetailStoreId(retailStoreId);
+						rs.setName(name);
+						rs.setRetailGroupId(retailGroupId);
+						spinnerArray.add(rs);
+					}
+					ArrayAdapter<RetailStore> adapter = new ArrayAdapter<RetailStore>(
+							getApplicationContext(),
+							android.R.layout.simple_spinner_item, spinnerArray);
+					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+					adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+					spRetailStores = (Spinner) findViewById(R.id.spRetailStore);
+					spRetailStores.setAdapter(adapter);
+				}
 
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -184,6 +195,15 @@ public class Settings extends Activity {
 			Context context = getApplicationContext();
 			ReadWrite.writeToFile(context, retailStore);
 
+			WSOUpdateUserSettings wsoUpdateUserSettings = new WSOUpdateUserSettings(context);
+			Object[] parameters = new Object[2];
+			parameters[0] = TelephoneManager.getDeviceId(getBaseContext(),
+					getContentResolver());
+			parameters[1] =retailStore.getRetailStoreId();
+			webResponse = wsoUpdateUserSettings.callWebService(parameters);
+			webMethod = Enums.WebMethod.updateUserSettings.ordinal();
+			handler.post(webServiceResult);
+			
 			String text = "Uspesna operacija";
 			MessageManager.showShortMessage(context, text);
 

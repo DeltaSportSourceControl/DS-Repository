@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Handler handler = new Handler();
 	private int webMethod = Enums.WebMethod.getRetailStores.ordinal();
 	private RetailStore selectedRetailStore;
-	private String androidVersion = "";
+	private String osVersion = "";
 	private Pattern pattern;
 	private Matcher matcher;
 	private static String EMAIL_PATTERN="^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";	
@@ -73,7 +73,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			super.onCreate(savedInstanceState);
 			deviceId = TelephoneManager.getDeviceId(getBaseContext(),
 					getContentResolver());
-			androidVersion = TelephoneManager.getAndroidVersion();
+			osVersion = TelephoneManager.getAndroidVersion();
 
 			checkLicence();
 
@@ -181,7 +181,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					register(jmbg, name, mail,
 							String.valueOf(selectedRetailStore
 									.getRetailStoreId()), deviceId,
-							androidVersion);
+							osVersion);
 				else
 				{
 					Toast toast = Toast.makeText(getApplicationContext(),
@@ -196,7 +196,7 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	private void register(final String jmbg, final String name,
 			final String mail, final String retailStoreId, final String device,
-			final String versionAnd) {
+			final String osVersion) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -211,7 +211,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						parameters[2] = mail;
 						parameters[3] = retailStoreId;
 						parameters[4] = device;
-						parameters[5] = versionAnd;
+						parameters[5] = osVersion;
 
 						webResponse = wsoStoreUserRequest
 								.callWebService(parameters);
